@@ -33,13 +33,16 @@ LOG_EVENT_TYPES = [
 ]
 
 if not OPENAI_API_KEY:
-    raise ValueError('Missing the OpenAI API key. Please set it in the .env file.')
+    raise ValueError(
+        'Missing the OpenAI API key. Please set it in the .env file.')
 
 app = FastAPI()
+
 
 @app.get("/", response_class=JSONResponse)
 async def index_page():
     return {"message": "Twilio Media Stream Server is running!"}
+
 
 @app.api_route("/incoming-call", methods=["GET", "POST"])
 async def handle_incoming_call(request: Request):
@@ -54,12 +57,14 @@ async def handle_incoming_call(request: Request):
     response.append(connect)
     return HTMLResponse(content=str(response), media_type="application/xml")
 
+
 @app.websocket("/media-stream")
 async def handle_media_stream(websocket: WebSocket):
     print("Client connected")
     await websocket.accept()
     media_stream_session = MediaStreamSession(websocket)
     await media_stream_session.run()
+
 
 class MediaStreamSession:
     def __init__(self, websocket: WebSocket):
@@ -123,7 +128,8 @@ class MediaStreamSession:
                 if event_type == 'response.audio.delta' and response.get('delta'):
                     self.response_in_progress = True
                     self.last_response_time = asyncio.get_running_loop().time()
-                    audio_payload = response['delta']  # delta is base64-encoded audio
+                    # delta is base64-encoded audio
+                    audio_payload = response['delta']
                     audio_delta = {
                         "event": "media",
                         "streamSid": self.stream_sid,
@@ -154,6 +160,7 @@ class MediaStreamSession:
     async def cancel_response(self):
         await self.openai_ws.send(json.dumps({"type": "response.cancel"}))
         self.response_in_progress = False
+
 
 if __name__ == "__main__":
     import uvicorn
