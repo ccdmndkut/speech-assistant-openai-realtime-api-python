@@ -103,7 +103,7 @@ class MediaStreamSession:
                 if event == 'media':
                     if self.openai_ws.open:
                         current_time = asyncio.get_running_loop().time()
-                        if self.response_in_progress and (current_time - self.last_response_time > 1.5):
+                        if self.response_in_progress and (current_time - self.last_response_time > 0.5):
                             await self.cancel_response()
                         audio_append = {
                             "type": "input_audio_buffer.append",
